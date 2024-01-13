@@ -1,6 +1,6 @@
 const express = require('express');
+const path = require('path');
 const ejs = require('ejs');
-const mongoose = require('mongoose');
 require('dotenv').config();
 
 const app = express();
@@ -11,6 +11,7 @@ const app = express();
 */ 
 
 app.set("view engine",ejs);
+app.set("views" , path.resolve("./views"));
 
 app.use(express.urlencoded({extended:true}));
 
@@ -20,26 +21,14 @@ app.use(express.urlencoded({extended:true}));
 */ 
 
 const PORT = process.env.PORT || 8000;
-const DB_URL= process.env.DB_URL;
-
 
 /*
-    Database Connection
-*/ 
+    Database
+*/
 
-const dbConnect =async ()=>{
-    await mongoose.connect(DB_URL);
-}
-dbConnect()
-.then(res=>{
-console.log("Connected to Database");
-})
-.catch(err=>{
-    console.log("Error Connecting", err);
-});
-
-
-
+const dbConnect = require("./config/database");
+const route = require("./routes/blog");
+app.use("/",route);
 /*
     Server is Listening
 */ 
