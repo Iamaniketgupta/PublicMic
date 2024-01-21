@@ -1,36 +1,29 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const ejs = require('ejs');
-require('dotenv').config();
+require("./config/database");
 
 const app = express();
 
-
-/*
-    View Engine - ExpressJs
-*/ 
-
 app.set("view engine",ejs);
 app.set("views" , path.resolve("./views"));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.use(express.urlencoded({extended:true}));
 
-
-/*
-    Environment Variables
-*/ 
-
 const PORT = process.env.PORT || 8000;
 
-/*
-    Database
-*/
+// ROUTES
 
-const dbConnect = require("./config/database");
-const route = require("./routes/blog");
-app.use("/",route);
+const router = require('./routes/indexRoute');
+
+// User Routes
+app.use("/",router);
+
+
 /*
-    Server is Listening
+    Server 
 */ 
 
 app.listen(PORT,()=>{

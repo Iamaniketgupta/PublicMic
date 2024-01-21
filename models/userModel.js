@@ -1,3 +1,4 @@
+const { createHmac, randomBytes } = require("crypto");
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
@@ -8,32 +9,45 @@ const userSchema = new mongoose.Schema(
         },
         avatar: {
             type: String,
-            default: ""
+            default: "/images/default.png",
         },
         email: {
             type: String,
             required: true,
             unique: true
         },
+        salt: {
+            type: String,
+            // required: true,
+        },
         password: {
             type: String,
             required: true
         },
-        verified: {
-            type: Boolean,
-            default: false
-        },
-        verificationCode: {
+
+        role: {
             type: String,
-            required: false
-        },
-        admin: {
-            type: Boolean,
-            default: false
+            enum: ["USER", "ADMIN"],
+            default: "USER"
         }
-        
+
     },
     { timestamps: true }
 );
+
+userSchema.pre("save", function (next) {
+    const user = this;
+
+    if (!user.isModified("password")) return;
+
+    const salt = randomBytes(16).toString();
+    const hashedPassword = createHmac("sha256", salt)
+        .update(user.password)
+        .digest("hex");
+
+        this.salt =salt;
+        this.password = hashedPassword;
+        next();
+});
 
 module.exports = mongoose.model("user", userSchema);
